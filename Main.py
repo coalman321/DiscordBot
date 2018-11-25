@@ -8,48 +8,67 @@ cred = credentials.Certificate('C:\\Users\\Cole Tucker\\Downloads\\a-testproject
 defaultapp = firebase_admin.initialize_app(cred,  {'databaseURL': 'https://a-testproject-86d51.firebaseio.com'})
 
 client = discord.Client()
-user = db.reference('Users/Modbot/Auth').get() #grab bot token from DB
-print(user)
+user = 'Modbot'
+disuser = db.reference('Users/' + user + '/Auth').get() #grab bot token from DB
+print(disuser)
+
 
 @client.event
 async def on_ready():
     print('Logged in as: ' + client.user.name)
-    print(client.user.id)
+    #print(client.user.id)
     do_refresh()
 
 @client.event
 async def on_message(message):
-    print(has_priveledge(message.author))
+    #print(get_emote_by_name("Brick", message))
     if message.author == client.user:
         return
     for com in commands:
         if com in message.content:
-            dbresp = db.reference('Users/Modbot/Commands/' + com).get()
-            msg = dbresp.format(message)
-            await client.send_message(message.channel, msg)
+            dbresp = db.reference('Users/' + user + '/Commands/' + com).get()
+            if len(message.mentions) > 0:
+                await client.send_message(message.channel, dbresp.format(message, list(message.mentions)[0]))
+            else:
+                await client.send_message(message.channel, dbresp.format(message))
     if has_priveledge(message.author):
         for role in priv_roles:
             if has_role(message.author, role):
-                print('author has ' + role)
-                dbresp = db.reference('Users/Modbot/PrivCommands/' + role).get()
-                print(dbresp)
+                dbcommresp = db.reference('Users/' + user + '/PrivCommands/' + role).get()
+                for com in dbcommresp:
+                    if com in message.content:
+                        print('com found ' + com)
+                        dbresp = db.reference('Users/' + user + '/PrivCommands/' + role + '/' + com).get()
+                        if 'refresh' in com:
+                            do_refresh()
+                        if 'assigned role' in dbresp:
+                            await client.add_roles(list(message.mentions)[0], get_role_by_name(dbresp[dbresp.find('"') + 1: len(dbresp)-1], message))
+                        if len(message.mentions) > 0:
+                            await client.send_message(message.channel, dbresp.format(message, list(message.mentions)[0]))
+                        else:
+                            await client.send_message(message.channel, dbresp.format(message))
+
 
 
 @client.event
 async def on_message_edit(before, after):
-    print('user edited message')
-    await client.add_reaction(after,emoji[9])
+    action_pef = False
+    for action in on_edit:
+        if action in after.content and action != 'default':
+            print('non default action')
+            dbresp = db.reference('Users/' + user + '/OnEdit/' + action)
+            action_pef = True
+    if not action_pef:
+        dbresp = db.reference('Users/' + user + '/OnEdit/default').get()
+        await client.add_reaction(after,get_emote_by_name(dbresp, after))
 
 def do_refresh():
-    global commands, emoji, priv_roles
-    commands = db.reference('Users/Modbot/Commands/').get()
-    priv_roles = db.reference('Users/Modbot/PrivCommands').get(shallow=True)
+    global commands, emoji, priv_roles, on_edit
+    commands = db.reference('Users/' + user + '/Commands/').get()
+    priv_roles = db.reference('Users/' + user + '/PrivCommands').get(shallow=True)
+    on_edit = db.reference('Users/' + user + '/OnEdit').get()
     emoji = list(client.get_all_emojis())
-    #print(commands)
-    for emo in emoji:
-       print(emo)
-    for com in priv_roles:
-        print(com)
+
 
 def has_role(user, check_role):
     for role in user.roles:
@@ -63,6 +82,16 @@ def has_priveledge(user):
         to_ret |= has_role(user, role)
     return to_ret
 
+def get_role_by_name(name, message):
+    for role in list(message.server.roles):
+        if role.name == name:
+            return role
+    return None
 
+def get_emote_by_name(name, message):
+    for emo in emoji:
+        if emo.name == name:
+            return emo
+    return None
 
-client.run(user)
+client.run(disuser)
