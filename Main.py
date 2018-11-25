@@ -37,11 +37,11 @@ async def on_message(message):
                 dbcommresp = db.reference('Users/' + user + '/PrivCommands/' + role).get()
                 for com in dbcommresp:
                     if com in message.content:
-                        print('com found ' + com)
+                        #print('com found ' + com)
                         dbresp = db.reference('Users/' + user + '/PrivCommands/' + role + '/' + com).get()
                         if 'refresh' in com:
                             do_refresh()
-                        if 'assigned role' in dbresp:
+                        if 'assigned role' in dbresp and len(message.mentions) > 0:
                             await client.add_roles(list(message.mentions)[0], get_role_by_name(dbresp[dbresp.find('"') + 1: len(dbresp)-1], message))
                         if len(message.mentions) > 0:
                             await client.send_message(message.channel, dbresp.format(message, list(message.mentions)[0]))
