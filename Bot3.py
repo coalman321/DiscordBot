@@ -14,6 +14,9 @@ while row:
     print(row[0])
     row = cursor.fetchone()
 
+'''Select * from Test.dbo.BotCommands
+where '!pong' like concat('%', STRCOMMAND, '%')''' #query for commands
+
 # Sample insert query
 cursor.execute("INSERT SalesLT.Product (Name, ProductNumber, StandardCost, ListPrice, SellStartDate) OUTPUT INSERTED.ProductID VALUES ('SQL Server Express New 20', 'SQLEXPRESS New 20', 0, 0, CURRENT_TIMESTAMP )")
 row = cursor.fetchone()
