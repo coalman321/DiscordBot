@@ -1,4 +1,4 @@
 Select * from Test.dbo.BotCommands
-where STRCOMMAND like '%%'
+where COMMAND like '%%'
 
-select * from Test.dbo.BotUsers
+select BOTKEY from Test.dbo.BotUsers where BOTNAME like 'MODBOT'
