@@ -1,2 +1,2 @@
 Select * from Test.dbo.BotCommands
-where '!pong' like concat('%', STRCOMMAND, '%')
+--where '!pong' like concat('%', COMMAND, '%')

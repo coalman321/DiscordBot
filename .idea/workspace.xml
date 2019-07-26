@@ -2,12 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f995a172-8271-4e1a-bb7b-b027c4c84519" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/DiscordBot.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/DiscordBot.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Bot3.py" beforeDir="false" afterPath="$PROJECT_DIR$/Bot3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/create commands.sql" beforeDir="false" afterPath="$PROJECT_DIR$/create commands.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/list commands.sql" beforeDir="false" afterPath="$PROJECT_DIR$/list commands.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/command query.sql" beforeDir="false" afterPath="$PROJECT_DIR$/command query.sql" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -51,20 +47,20 @@
     <session id="-1645836448">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="2" />
+          <entry key="project.closed" value="3" />
           <entry key="project.open.time.0" value="1" />
-          <entry key="project.open.time.4" value="1" />
-          <entry key="project.opened" value="2" />
+          <entry key="project.open.time.4" value="2" />
+          <entry key="project.opened" value="3" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="680" />
+          <entry key="py" value="1572" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="680" />
+          <entry key="Python" value="1572" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -96,12 +92,12 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Bot3.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="571">
-              <caret line="61" column="34" selection-start-line="61" selection-start-column="34" selection-end-line="61" selection-end-column="34" />
+            <state relative-caret-position="1268">
+              <caret line="118" column="23" selection-start-line="118" selection-start-column="23" selection-end-line="118" selection-end-column="23" />
               <folding>
-                <element signature="e#0#14#0" expanded="true" />
-                <marker date="1564080015616" expanded="true" signature="1554:1817" ph="..." />
-                <marker date="1564080015616" expanded="true" signature="1848:1853" ph="..." />
+                <element signature="e#4#27#0" expanded="true" />
+                <marker date="1564091351986" expanded="true" signature="2415:2447" ph="..." />
+                <marker date="1564091351986" expanded="true" signature="3167:3346" ph="..." />
               </folding>
             </state>
           </provider>
@@ -141,10 +137,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="551" />
+    <option name="x" value="550" />
     <option name="y" value="220" />
     <option name="width" value="980" />
-    <option name="height" value="679" />
+    <option name="height" value="680" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -322,12 +318,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Bot3.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="571">
-          <caret line="61" column="34" selection-start-line="61" selection-start-column="34" selection-end-line="61" selection-end-column="34" />
+        <state relative-caret-position="1268">
+          <caret line="118" column="23" selection-start-line="118" selection-start-column="23" selection-end-line="118" selection-end-column="23" />
           <folding>
-            <element signature="e#0#14#0" expanded="true" />
-            <marker date="1564080015616" expanded="true" signature="1554:1817" ph="..." />
-            <marker date="1564080015616" expanded="true" signature="1848:1853" ph="..." />
+            <element signature="e#4#27#0" expanded="true" />
+            <marker date="1564091351986" expanded="true" signature="2415:2447" ph="..." />
+            <marker date="1564091351986" expanded="true" signature="3167:3346" ph="..." />
           </folding>
         </state>
       </provider>

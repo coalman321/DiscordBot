@@ -1,3 +1,4 @@
+from queue import Queue
 import discord
 import pyodbc
 
@@ -7,6 +8,7 @@ database = 'Test'
 commandtable = '.dbo.BotCommands'
 authtable = '.dbo.BotUsers'
 cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';Trusted_Connection=yes;')
+cnxn.autocommit = False
 cursor = cnxn.cursor()
 
 cursor.execute('select BOTKEY from ' + database + authtable + ' where BOTNAME = \'' + botuser + '\'')
@@ -14,6 +16,9 @@ row = cursor.fetchone()
 
 client = discord.Client()
 disuser = row[0]
+
+sql_queue_out = Queue()
+
 
 @client.event
 async def on_ready():
@@ -24,27 +29,30 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    query = 'Select * from Test.dbo.BotCommands where \'' + message.content + '\' like COMMAND;'
+    query = 'Select * from ' + database + commandtable + ' where \'' + message.content + '\' like COMMAND;'
     cursor.execute(query)
     row = cursor.fetchone()
 
-    while row:
-        print(row)
+    if row is None: return
 
-        if not row[4] is None and not has_role(message.author, row[4]):
-            await message.channel.send("User does not have sufficient permissions")
-            return
+    print(row)
 
-        await process_command(message, row[2])
+    if not row[4] is None and not has_role(message.author, row[4]):
+        await message.channel.send("User does not have sufficient permissions")
+        return
 
-        user_out = row[1]
-        if len(message.mentions) > 0:
-            for user in message.mentions:
-                await message.channel.send(user_out.format(message, user))
-        else:
-            await message.channel.send(user_out.format(message))
+    add_increment_to_queue(row[6], row[0])
 
-        row = cursor.fetchone()
+    await process_command(message, row[2])
+
+    user_out = row[1]
+    if len(message.mentions) > 0:
+        for user in message.mentions:
+            await message.channel.send(user_out.format(message, user))
+    else:
+        await message.channel.send(user_out.format(message))
+
+    process_sql_writes()
 
 @client.event
 async def on_message_edit(before, after):
@@ -61,6 +69,22 @@ async def process_command(message, internal_cmd):
 
     elif 'remove' in internal_cmd:
         await del_user_role(list(message.mentions), get_role_by_name(internal_cmd[7:], message))
+
+    elif 'addcommand' in internal_cmd:
+
+        sql_queue_out.put_nowait("")
+
+    elif 'deletecommand' in internal_cmd:
+        row = cursor.fetchone()
+        while row:
+            commandname = row[0]
+            sql_queue_out.put("") # figure out delete query to run
+            row = cursor.fetchone()
+
+def add_increment_to_queue(previous_count, command_name):
+    query = 'UPDATE ' + database + commandtable + ' set USES = ' + str(int(previous_count) + 1) + ' where COMMAND = \'' + command_name + '\''
+    sql_queue_out.put(query)
+
 
 def has_role(user, check_role):
     for role in user.roles:
@@ -90,5 +114,15 @@ async def assign_user_role(users, role):
 async def del_user_role(users, role):
     for user in users:
         await user.remove_roles(role)
+
+
+def process_sql_writes():
+    #print("sql queue size " + str(sql_queue_out.qsize()))
+    while sql_queue_out.qsize() > 0:
+        query = sql_queue_out.get()
+        print("writing query + \'" + query + "\'")
+        cursor.execute(query)
+        cnxn.commit()
+
 
 client.run(disuser)
