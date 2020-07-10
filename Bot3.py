@@ -1,4 +1,6 @@
 from queue import Queue
+import time
+import datetime
 import discord
 import pyodbc
 
@@ -19,10 +21,14 @@ disuser = row[0]
 
 sql_queue_out = Queue()
 
+bot_start = datetime.now()
+up_time = datetime.timedelta()
+
 
 @client.event
 async def on_ready():
     print('Logged in as: ' + client.user.name)
+    bot_start = datetime.now()
 
 @client.event
 async def on_message(message):
@@ -49,6 +55,8 @@ async def on_message(message):
     if len(message.mentions) > 0:
         for user in message.mentions:
             await message.channel.send(user_out.format(message, user))
+    elif 'uptime' in row[2]:
+        await message.channel.send(user_out.format(message, up_time))
     else:
         await message.channel.send(user_out.format(message))
 
@@ -69,6 +77,9 @@ async def process_command(message, internal_cmd):
 
     elif 'remove' in internal_cmd:
         await del_user_role(list(message.mentions), get_role_by_name(internal_cmd[7:], message))
+
+    elif 'uptime' in internal_cmd:
+        up_time = datetime.now() - bot_start
 
     elif 'addcommand' in internal_cmd:
 
@@ -126,3 +137,4 @@ def process_sql_writes():
 
 
 client.run(disuser)
+
