@@ -3,27 +3,42 @@ import time
 import datetime
 import discord
 import pyodbc
+import asyncio
 
+#defined constants for base access
 botuser = 'MODBOT'
 server = 'localhost'
 database = 'Test'
 commandtable = '.dbo.BotCommands'
 authtable = '.dbo.BotUsers'
+bot_start = datetime.now()
+up_time = datetime.timedelta()
+sql_queue_out = Queue()
+
+#estabish connection 
 cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER='+server+';DATABASE='+database+';Trusted_Connection=yes;')
 cnxn.autocommit = False
 cursor = cnxn.cursor()
-
 cursor.execute('select BOTKEY from ' + database + authtable + ' where BOTNAME = \'' + botuser + '\'')
 row = cursor.fetchone()
 
 client = discord.Client()
 disuser = row[0]
 
-sql_queue_out = Queue()
+#helper class for an async timer
+class Timer:
+    def __init__(self, timeout, callback, context):
+        self._timeout = timeout
+        self._callback = callback
+        self._context = context
+        self._task = asyncio.ensure_future(self._job())
 
-bot_start = datetime.now()
-up_time = datetime.timedelta()
+    async def _job(self):
+        await asyncio.sleep(self._timeout)
+        await self._callback(context)
 
+    def cancel(self):
+        self._task.cancel()
 
 @client.event
 async def on_ready():
@@ -49,7 +64,7 @@ async def on_message(message):
 
     add_increment_to_queue(row[6], row[0])
 
-    await process_command(message, row[2])
+    await process_command({'message': message, 'internal_cmd': row[2]})
 
     user_out = row[1]
     if len(message.mentions) > 0:
@@ -66,11 +81,30 @@ async def on_message(message):
 async def on_message_edit(before, after):
     print('no-op')
 
-async def process_command(message, internal_cmd):
+async def process_command(context):
+    internal_cmd = context['internal_cmd']
+    message = context['message']
     if internal_cmd is None: return
 
-    print(internal_cmd)
-
+    #ex: timer 5 do assign Muted then remove Muted
+    if 'timer' in internal_cmd:
+        print('timer command')
+        imediate_start = internal_cmd.find("do")
+        timed_start = internal_cmd.find("then")
+        delay = int(internal_cmd[5: immediate_start])
+        if(imediate_start > timed_start):
+            print('Improper order')
+            return
+        if(timed_start < 0 or imediate_start < 0):
+            print('command missing input')
+            return
+        if(delay <= 0):
+            print('bad delay')
+            return
+        immediate_cxt={'internal_cmd':internal_cmd[imediate_start + 2:timed_start], 'message':message}
+        timed_cxt={'internal_cmd':internal_cmd[timed_start + 4:], 'message':message}
+        await process_command(immediate_cxt)
+        timer = Timer(delay, process_command, timed_cxt)
 
     if 'assign' in internal_cmd:
         await assign_user_role(list(message.mentions), get_role_by_name(internal_cmd[7:], message))
@@ -131,7 +165,7 @@ def process_sql_writes():
     #print("sql queue size " + str(sql_queue_out.qsize()))
     while sql_queue_out.qsize() > 0:
         query = sql_queue_out.get()
-        print("writing query + \'" + query + "\'")
+        # print("writing query + \'" + query + "\'")
         cursor.execute(query)
         cnxn.commit()
 
